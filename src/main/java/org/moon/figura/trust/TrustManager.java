@@ -3,9 +3,9 @@ package org.moon.figura.trust;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.nbt.*;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.fml.ModList;
 import org.moon.figura.FiguraMod;
 
 import java.io.FileInputStream;
@@ -36,7 +36,7 @@ public class TrustManager {
     public static void loadDefaultGroups() {
         try {
             //load presets file from resources
-            Path presets = FabricLoader.getInstance().getModContainer(FiguraMod.MOD_ID).get().getRootPath().resolve("assets/figura/trust/presets.json");
+            Path presets = ModList.get().getModContainerById(FiguraMod.MOD_ID).orElseThrow().getModInfo().getOwningFile().getFile().getFilePath().resolve("assets/figura/trust/presets.json");
             InputStreamReader fileReader = new InputStreamReader(Files.newInputStream(presets));
             JsonObject rootObject = (JsonObject) JsonParser.parseReader(fileReader);
 

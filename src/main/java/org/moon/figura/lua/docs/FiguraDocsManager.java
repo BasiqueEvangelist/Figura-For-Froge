@@ -1,8 +1,8 @@
 package org.moon.figura.lua.docs;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import org.moon.figura.FiguraMod;
@@ -400,24 +400,24 @@ public class FiguraDocsManager {
                     ).add(new ClassDoc(documentedClass));
     }
 
-    public static LiteralArgumentBuilder<FabricClientCommandSource> get() {
-        LiteralArgumentBuilder<FabricClientCommandSource> docs = LiteralArgumentBuilder.literal("docs");
+    public static LiteralArgumentBuilder<CommandSourceStack> get() {
+        LiteralArgumentBuilder<CommandSourceStack> docs = LiteralArgumentBuilder.literal("docs");
         for (Map.Entry<String, List<ClassDoc>> entry : GENERATED_CLASS_DOCS.entrySet()) {
-            LiteralArgumentBuilder<FabricClientCommandSource> group;
+            LiteralArgumentBuilder<CommandSourceStack> group;
             if (entry.getKey().length() > 0)
                 group = LiteralArgumentBuilder.literal(entry.getKey());
             else
                 group = docs;
             for (ClassDoc classDoc : entry.getValue()) {
-                LiteralArgumentBuilder<FabricClientCommandSource> typeBranch = LiteralArgumentBuilder.literal(classDoc.name);
+                LiteralArgumentBuilder<CommandSourceStack> typeBranch = LiteralArgumentBuilder.literal(classDoc.name);
                 typeBranch.executes(context -> {classDoc.print(); return 1;});
                 for (MethodDoc methodDoc : classDoc.documentedMethods) {
-                    LiteralArgumentBuilder<FabricClientCommandSource> methodBranch = LiteralArgumentBuilder.literal(methodDoc.name);
+                    LiteralArgumentBuilder<CommandSourceStack> methodBranch = LiteralArgumentBuilder.literal(methodDoc.name);
                     methodBranch.executes(context -> {methodDoc.print(); return 1;});
                     typeBranch.then(methodBranch);
                 }
                 for (FieldDoc fieldDoc : classDoc.documentedFields) {
-                    LiteralArgumentBuilder<FabricClientCommandSource> fieldBranch = LiteralArgumentBuilder.literal(fieldDoc.name);
+                    LiteralArgumentBuilder<CommandSourceStack> fieldBranch = LiteralArgumentBuilder.literal(fieldDoc.name);
                     fieldBranch.executes(context -> {fieldDoc.print(); return 1;});
                     typeBranch.then(fieldBranch);
                 }

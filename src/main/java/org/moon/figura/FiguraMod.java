@@ -1,15 +1,21 @@
 package org.moon.figura;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
-import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
+import net.minecraftforge.client.ConfigGuiHandler;
+import net.minecraftforge.client.gui.OverlayRegistry;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.IExtensionPoint;
+import net.minecraftforge.fml.ModList;
+import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.loading.FMLPaths;
 import org.moon.figura.avatars.Avatar;
 import org.moon.figura.avatars.AvatarManager;
 import org.moon.figura.avatars.providers.LocalAvatarLoader;
@@ -17,6 +23,7 @@ import org.moon.figura.backend.NetworkManager;
 import org.moon.figura.commands.FiguraCommands;
 import org.moon.figura.config.ConfigManager;
 import org.moon.figura.gui.PaperDoll;
+import org.moon.figura.gui.screens.ConfigScreen;
 import org.moon.figura.lua.FiguraLuaPrinter;
 import org.moon.figura.lua.docs.FiguraDocsManager;
 import org.moon.figura.trust.TrustManager;
@@ -30,37 +37,39 @@ import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.UUID;
 
-public class FiguraMod implements ClientModInitializer {
+@Mod.EventBusSubscriber(modid = FiguraMod.MOD_ID)
+public class FiguraMod {
 
     public static final String MOD_ID = "figura";
-    public static final String VERSION = FabricLoader.getInstance().getModContainer(MOD_ID).get().getMetadata().getVersion().getFriendlyString();
+    public static final String VERSION = ModList.get().getModContainerById(MOD_ID).orElseThrow().getModInfo().getVersion().toString();
     public static final boolean DEBUG_MODE = Math.random() + 1 < 0;
     public static final boolean CHEESE_DAY = LocalDate.now().getDayOfMonth() == 1 && LocalDate.now().getMonthValue() == 4;
-    public static final Path GAME_DIR = FabricLoader.getInstance().getGameDir().normalize();
+    public static final Path GAME_DIR = FMLPaths.GAMEDIR.get().normalize();
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID.substring(0, 1).toUpperCase() + MOD_ID.substring(1));
 
     public static boolean DO_OUR_NATIVES_WORK = false;
 
     public static int ticks = 0;
 
-    @Override
-    public void onInitializeClient() {
+    public static void onInitializeClient() {
         //init managers
         ConfigManager.init();
         TrustManager.init();
         FiguraDocsManager.init();
-        FiguraCommands.init();
+        MinecraftForge.EVENT_BUS.register(FiguraCommands.class);
+        MinecraftForge.EVENT_BUS.register(AvatarManager.class);
         LuaUtils.setupNativesForLua();
 
-        //register events
-        ClientTickEvents.START_CLIENT_TICK.register(FiguraMod::tick);
-        WorldRenderEvents.START.register(context -> AvatarManager.onWorldRender(context.tickDelta()));
-        WorldRenderEvents.END.register(context -> AvatarManager.afterWorldRender());
-        WorldRenderEvents.AFTER_ENTITIES.register(FiguraMod::renderFirstPersonWorldParts);
-        HudRenderCallback.EVENT.register(FiguraMod::hudRender);
+        OverlayRegistry.registerOverlayTop("Paper doll", PaperDoll::render);
+
+        ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(() -> "something", (remoteVersionString,networkBool) -> networkBool));
+        ModLoadingContext.get().registerExtensionPoint(ConfigGuiHandler.ConfigGuiFactory.class, () -> new ConfigGuiHandler.ConfigGuiFactory((minecraft, parent) -> new ConfigScreen(parent, false)));
     }
 
-    private static void tick(Minecraft client) {
+    @SubscribeEvent
+    public static void tick(TickEvent.ClientTickEvent event) {
+        if (event.phase != TickEvent.Phase.START) return;
+
         NetworkManager.tick();
         LocalAvatarLoader.tickWatchedKey();
         AvatarManager.tickLoadedAvatars();
@@ -68,19 +77,14 @@ public class FiguraMod implements ClientModInitializer {
         ticks++;
     }
 
-    private static void renderFirstPersonWorldParts(WorldRenderContext context) {
-        if (!context.camera().isDetached()) {
-            Entity watcher = context.camera().getEntity();
+    public static void renderFirstPersonWorldParts(Camera camera, PoseStack stack, float tickDelta, MultiBufferSource.BufferSource bufferSource) {
+        if (!camera.isDetached()) {
+            Entity watcher = camera.getEntity();
             Avatar avatar = AvatarManager.getAvatar(watcher);
             if (avatar != null) {
-                avatar.onFirstPersonWorldRender(watcher, context.consumers(), context.matrixStack(), context.camera(), context.tickDelta());
+                avatar.onFirstPersonWorldRender(watcher, bufferSource, stack, camera, tickDelta);
             }
         }
-    }
-
-    private static void hudRender(PoseStack stack, float delta) {
-        PaperDoll.render(stack);
-        //TODO popup menu, action wheel
     }
 
     // -- Helper Functions -- //

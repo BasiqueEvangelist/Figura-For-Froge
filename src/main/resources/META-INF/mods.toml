@@ -1,0 +1,30 @@
+modLoader = "javafml"
+loaderVersion = "[40,)"
+license = "LGPL-2.1"
+issueTrackerURL = "https://github.com/TheOneTrueZandra/Figura/issues"
+
+[[mods]]
+modId = "figura"
+version = "${version}"
+displayName = "Figura"
+description = "Figura is a client-side mod that allows players to change their player model and customize it, extensively"
+logoFile = "icon.png"
+authors = [
+"Francy-Chan",
+"ENinja33",
+"0xf24"
+]
+
+[[dependencies.figura]]
+modId = "forge"
+mandatory = true
+versionRange = "[40,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.figura]]
+modId = "minecraft"
+mandatory = true
+versionRange = "[${minecraft_version},)"
+ordering = "NONE"
+side = "BOTH"

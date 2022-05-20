@@ -3,6 +3,9 @@ package org.moon.figura.avatars;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraftforge.client.event.RenderLevelLastEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 import org.moon.figura.FiguraMod;
 import org.moon.figura.avatars.providers.LocalAvatarLoader;
 import org.moon.figura.gui.FiguraToast;
@@ -97,7 +100,8 @@ public class AvatarManager {
             avatar.worldRenderEvent(tickDelta);
     }
 
-    public static void afterWorldRender() {
+    @SubscribeEvent
+    public static void afterWorldRender(RenderLevelLastEvent event) {
         if (panic)
             return;
 

@@ -1,12 +1,12 @@
 package org.moon.figura.config;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import net.fabricmc.fabric.impl.client.keybinding.KeyBindingRegistryImpl;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
 import net.minecraft.network.chat.Component;
+import net.minecraftforge.client.ClientRegistry;
 import org.moon.figura.FiguraMod;
 import org.moon.figura.utils.ColorUtils;
 import org.moon.figura.utils.FiguraText;
@@ -231,7 +231,7 @@ public enum Config {
         public ConfigKeyBind(String translationKey, InputConstants.Key key, Config config) {
             super(translationKey, key.getType(), key.getValue(), FiguraMod.MOD_ID);
             this.config = config;
-            KeyBindingRegistryImpl.registerKeyBinding(this);
+            ClientRegistry.registerKeyBinding(this);
         }
 
         @Override

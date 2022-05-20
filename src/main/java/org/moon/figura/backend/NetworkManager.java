@@ -1,10 +1,10 @@
 package org.moon.figura.backend;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientHandshakePacketListenerImpl;
 import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.Connection;
 import net.minecraft.network.ConnectionProtocol;
 import net.minecraft.network.chat.Component;
@@ -62,8 +62,8 @@ public class NetworkManager {
         authConnection.send(new ServerboundHelloPacket(minecraft.getUser().getGameProfile()));
     }
 
-    public static LiteralArgumentBuilder<FabricClientCommandSource> getCommand() {
-        LiteralArgumentBuilder<FabricClientCommandSource> connect = LiteralArgumentBuilder.literal("connect");
+    public static LiteralArgumentBuilder<CommandSourceStack> getCommand() {
+        LiteralArgumentBuilder<CommandSourceStack> connect = LiteralArgumentBuilder.literal("connect");
         connect.executes(context -> {
             NetworkManager.auth();
             return 1;

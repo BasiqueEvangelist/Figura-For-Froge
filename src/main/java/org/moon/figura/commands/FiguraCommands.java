@@ -1,17 +1,19 @@
 package org.moon.figura.commands;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import net.fabricmc.fabric.api.client.command.v1.ClientCommandManager;
-import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraftforge.client.event.RegisterClientCommandsEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.moon.figura.FiguraMod;
 import org.moon.figura.backend.NetworkManager;
 import org.moon.figura.lua.docs.FiguraDocsManager;
 
 public class FiguraCommands {
 
-    public static void init() {
+    @SubscribeEvent
+    public static void onRegisterClientCommands(RegisterClientCommandsEvent event) {
         //root
-        LiteralArgumentBuilder<FabricClientCommandSource> root = LiteralArgumentBuilder.literal(FiguraMod.MOD_ID);
+        LiteralArgumentBuilder<CommandSourceStack> root = LiteralArgumentBuilder.literal(FiguraMod.MOD_ID);
 
         //docs
         root.then(FiguraDocsManager.get());
@@ -30,6 +32,6 @@ public class FiguraCommands {
             root.then(NetworkManager.getCommand());
 
         //register
-        ClientCommandManager.DISPATCHER.register(root);
+        event.getDispatcher().register(root);
     }
 }

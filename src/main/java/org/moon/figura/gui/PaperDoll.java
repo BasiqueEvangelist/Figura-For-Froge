@@ -3,6 +3,7 @@ package org.moon.figura.gui;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;
+import net.minecraftforge.client.gui.ForgeIngameGui;
 import org.moon.figura.config.Config;
 import org.moon.figura.utils.ui.UIHelper;
 
@@ -10,7 +11,7 @@ public class PaperDoll {
 
     private static Long lastActivityTime = 0L;
 
-    public static void render(PoseStack stack) {
+    public static void render(ForgeIngameGui gui, PoseStack stack, float f, int i, int j) {
         Minecraft minecraft = Minecraft.getInstance();
         Player player = minecraft.player;
 
